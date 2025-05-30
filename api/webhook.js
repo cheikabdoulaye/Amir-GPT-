@@ -1,18 +1,28 @@
-module.exports = (req, res) => {
-  const VERIFY_TOKEN = "pagebot"; // Le même que dans Meta
+// 1. Importer ce qu'il faut
+import { createServer } from 'vercel-http';
+import express from 'express';
+import axios from 'axios';
 
-  if (req.method === "GET") {
-    const mode = req.query["hub.mode"];
-    const token = req.query["hub.verify_token"];
-    const challenge = req.query["hub.challenge"];
+// 2. Créer ton app Express
+const app = express();
+app.use(express.json());
 
-    if (mode === "subscribe" && token === VERIFY_TOKEN) {
-      console.log("WEBHOOK_VERIFIED");
-      res.status(200).send(challenge);
-    } else {
-      res.sendStatus(403);
-    }
-  } else {
-    res.sendStatus(404);
+// 3. Route GET (pour vérifier que tout fonctionne)
+app.get('/', (req, res) => {
+  res.send('AMIR-GPT Webhook is live!');
+});
+
+// 4. Route POST (c'est ici que Facebook envoie les messages)
+app.post('/webhook', async (req, res) => {
+  try {
+    console.log('Reçu webhook POST :', req.body);
+    // Mets ici ton traitement si besoin
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Erreur webhook POST :', error);
+    res.sendStatus(500);
   }
-};
+});
+
+// 5. Export pour que Vercel comprenne ton serveur
+export default createServer(app);
